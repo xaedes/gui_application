@@ -7,16 +7,24 @@ add_library(
     include/${PROJECT_NAME}/version.h
     include/${PROJECT_NAME}/gui_application.h
     
+    # src/imgui_gl.cpp
+    src/random.cpp
+    src/glm_to_string.cpp
     src/gui_application.cpp
-    src/shader/replace_string.cpp
-    src/shader/default_shaders.cpp
+    # src/shader/default_shaders.cpp
+    # src/drawing/texture_quad.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
-target_link_libraries(${PROJECT_NAME} PUBLIC GLEW::glew)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
-target_link_libraries(${PROJECT_NAME} PUBLIC glm)
-target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
+# target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL)
+# target_link_libraries(${PROJECT_NAME} PUBLIC GLEW::glew)
+# target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
+# target_link_libraries(${PROJECT_NAME} PUBLIC glm)
+# target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC gl_classes)
+
+# target_link_libraries(${PROJECT_NAME} PUBLIC chunky_mem)
+# target_link_libraries(${PROJECT_NAME} PUBLIC transform_tree_glm)
 
 target_include_directories(
     ${PROJECT_NAME}
@@ -24,12 +32,18 @@ target_include_directories(
         $<INSTALL_INTERFACE:include>    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+target_compile_options(
+    ${PROJECT_NAME}
+    PUBLIC 
+    # glm::vec4().xyz , etc..
+    -DGLM_FORCE_SWIZZLE 
+    -DGLM_FORCE_INLINE 
+)
 
 set(
     PROGRAMS
     app
     imgui_demo
-    cube_demo
 )
 foreach(PROGRAM_NAME ${PROGRAMS})
     set(EXECUTABLE_NAME "${PROJECT_NAME}_${PROGRAM_NAME}")
@@ -44,6 +58,8 @@ if (TARGET Catch2::Catch2)
     set(
         TEST_MODULES
         test_cameras_first_person_view
+        # test_transform
+        # test_index_set_linked_list
     )
     set(
         BENCHMARK_MODULES

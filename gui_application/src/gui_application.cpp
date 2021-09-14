@@ -5,6 +5,7 @@
 
 namespace gui_application {
 
+
 void MessageCallback( GLenum source,
                  GLenum type,
                  GLuint id,
@@ -13,6 +14,7 @@ void MessageCallback( GLenum source,
                  const GLchar* message,
                  const void* userParam )
 {
+    if (severity != GL_DEBUG_SEVERITY_HIGH) return;
     fprintf( 
         stderr, 
         "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
@@ -22,7 +24,8 @@ void MessageCallback( GLenum source,
 
 }
 
-GuiApplication::GuiApplication()
+GuiApplication::GuiApplication(bool enableGlDebugOutput)
+    : m_enableGlDebugOutput(enableGlDebugOutput)
 {
 
 }
@@ -93,8 +96,11 @@ int GuiApplication::run()
         return 1;
     }
 
-    glEnable              ( GL_DEBUG_OUTPUT );
-    glDebugMessageCallback( MessageCallback, 0 );
+    if (m_enableGlDebugOutput)
+    {
+        glEnable              ( GL_DEBUG_OUTPUT );
+        glDebugMessageCallback( MessageCallback, 0 );
+    }
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

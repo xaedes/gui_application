@@ -6,7 +6,7 @@
 
 
 
-TEST_CASE("gui_application::cameras::FirstPersonView", "[gui_application][cameras][FirstPersonView][template]")
+TEST_CASE("gui_application::cameras::FirstPersonView", "[gui_application][cameras][FirstPersonView]")
 {
     using FirstPersonView = gui_application::cameras::FirstPersonView;
 
