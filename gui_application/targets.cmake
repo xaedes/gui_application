@@ -57,7 +57,7 @@ if (TARGET Catch2::Catch2)
     # a test program containing all tests will be built by linking against all test modules.
     set(
         TEST_MODULES
-        test_cameras_first_person_view
+        # test_cameras_first_person_view
         # test_transform
         # test_index_set_linked_list
     )
