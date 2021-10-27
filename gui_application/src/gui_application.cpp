@@ -49,7 +49,13 @@ int GuiApplication::run()
         return 1;
 
     // Decide GL+GLSL versions
-#ifdef __APPLE__
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+    // GL ES 2.0 + GLSL 100
+    const char* glsl_version = "#version 100";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
     // GL 3.2 + GLSL 150
     const char* glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -72,24 +78,25 @@ int GuiApplication::run()
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1); // Enable vsync
 
-    // Initialize OpenGL loader
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-    bool err = gl3wInit() != 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
     bool err = glewInit() != GLEW_OK;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-    bool err = gladLoadGL() == 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
-    bool err = gladLoadGL(glfwGetProcAddress) == 0; // glad2 recommend using the windowing library loader instead of the (optionally) bundled one.
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-    bool err = false;
-    glbinding::Binding::initialize();
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-    bool err = false;
-    glbinding::initialize([](const char* name) { return (glbinding::ProcAddress)glfwGetProcAddress(name); });
-#else
-    bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
-#endif
+//     // Initialize OpenGL loader
+// #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+//     bool err = gl3wInit() != 0;
+// #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+//     bool err = glewInit() != GLEW_OK;
+// #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+//     bool err = gladLoadGL() == 0;
+// #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD2)
+//     bool err = gladLoadGL(glfwGetProcAddress) == 0; // glad2 recommend using the windowing library loader instead of the (optionally) bundled one.
+// #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
+//     bool err = false;
+//     glbinding::Binding::initialize();
+// #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
+//     bool err = false;
+//     glbinding::initialize([](const char* name) { return (glbinding::ProcAddress)glfwGetProcAddress(name); });
+// #else
+//     bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
+// #endif
     if (err)
     {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
@@ -119,12 +126,19 @@ int GuiApplication::run()
     ImGui_ImplOpenGL3_Init(glsl_version);
 
 
+
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     
     this->setupFonts();
 
     this->setup();
+
+    if (m_enableGlDebugOutput)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(MessageCallback, 0);
+    }
 
     // Main loop
     while (!glfwWindowShouldClose(m_window))
